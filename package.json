@@ -1,0 +1,35 @@
+{
+  "name": "color-roles",
+  "version": "1.0.0",
+  "description": "Strip color based roles from users that aren't tier 3",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsc && node ./build/bot.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NewCircuit/color-roles.git"
+  },
+  "author": "Floor Gang <https://github.com/NewCircuit>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NewCircuit/color-roles/issues"
+  },
+  "homepage": "https://github.com/NewCircuit/color-roles#readme",
+  "dependencies": {
+    "discord.js": "^12.5.1",
+    "discord.js-commando": "github:discordjs/Commando",
+    "js-yaml": "^3.14.1",
+    "typescript": "^4.1.3"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^3.12.5",
+    "@types/node": "^14.14.14",
+    "@typescript-eslint/eslint-plugin": "^4.11.0",
+    "@typescript-eslint/parser": "^4.11.0",
+    "eslint": "^7.16.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1"
+  }
+}
