@@ -56,9 +56,8 @@ export const command: Command = {
                     .setLabel((page + 1).toString())
                     .setStyle("PRIMARY");
 
-                if (finalPage < 2) right.setDisabled(true);
-
-                if (finalPage !== 0) {
+                if (finalPage < 1) right.setDisabled(true);
+                if (finalPage > 1) {
 
 
                     buttons = [new MessageActionRow()
@@ -94,7 +93,7 @@ export const command: Command = {
                             left.setLabel((page - 1).toString()).setDisabled(false);
 
                             right.setLabel((page + 1).toString());
-                            if (finalPage - 1 === page) right.setDisabled(true);
+                            if (finalPage === page) right.setDisabled(true);
 
                             buttons = [new MessageActionRow()
                                 .setComponents(
@@ -105,6 +104,7 @@ export const command: Command = {
 
                             await msgEmbed.edit({
                                 "components": buttons, embeds: [{
+                                    color: client.primaryColour,
                                     "title": "List of Roles",
                                     "description": pagedRolesList.map((c) => `⦾ **${c.roleGroup}** <@&${c.roleID}>`).join("\n")
                                 }]
@@ -117,7 +117,7 @@ export const command: Command = {
                             page--;
                             await i.deferUpdate();
                             left.setLabel((page - 1).toString());
-                            if (page < 0) left.setDisabled(true);
+                            if (page < 2) left.setDisabled(true);
 
                             right.setLabel((page + 1).toString()).setDisabled(false);
 
@@ -130,6 +130,7 @@ export const command: Command = {
 
                             await msgEmbed.edit({
                                 "components": buttons, embeds: [{
+                                    color: client.primaryColour,
                                     "title": "List of Roles",
                                     "description": pagedRolesList.map((c) => `⦾ **${c.roleGroup}** <@&${c.roleID}>`).join("\n")
                                 }]
@@ -154,6 +155,7 @@ export const command: Command = {
 
                     await msgEmbed.edit({
                         embeds: [{
+                            color: client.primaryColour,
                             "title": "List of Roles",
                             "description": pagedRolesList.map((c) => `⦾ **${c.roleGroup}** <@&${c.roleID}>`).join("\n"),
                             "footer": { "text": "Page buttons have timed out" }
@@ -210,6 +212,7 @@ export const command: Command = {
                     roles.forEach(async (r, index, arr) => {
 
                         let dbRole = await rolesRepo.findOne({ where: { "serverID": msg.guild?.id ?? "1", "roleID": r.id } })
+                        if (client.whitelist.some((role) => role.whitelistedRole === r.id)) return reject(r);
 
                         if (dbRole === undefined) {
                             const newRole = new Roles();
@@ -231,8 +234,12 @@ export const command: Command = {
                     await waitForroles;
 
                 } catch (err) {
-                    return client.commandFailed(msg);
-                }
+                    return client.embedReply(msg, {
+                        embed: {
+                            "color": "RED",
+                            "description": `${err} is already on the list for the whitelisted roles,\n> use \`whitelist list\` to view them!`
+                        }
+                    })                }
 
                 const listORoles = await client.embedReply(msg, {
                     embed: {
