@@ -1,8 +1,8 @@
 import { Collection, Interaction, Message, MessageActionRow, MessageButton, Role } from "discord.js";
 import { Command } from "../../interfaces";
-import { getRole } from "../../utils/getRole";
 import { Roles } from "../../entity/roles";
 import { getRepository } from "typeorm";
+import { getRole } from "../../utils/getRole";
 
 const pageTracker: Collection<string, number> = new Collection();
 export const command: Command = {
@@ -171,14 +171,14 @@ export const command: Command = {
 
             case "add": {
                 args.shift();
-                const failText = "**Please mention a role(s) to add**,\n> If you want to add multiple roles you may use the command like this:\n> `roles add @role1 @role2 @role3`"
+                const failText = "**Please mention a role(s) to add**,\n> If you want to add multiple roles you may use the command like this:\n> `roles add @role1 @role2 @role3`";
                 if (args.length === 0) {
                     return client.embedReply(msg, {
                         embed: {
                             "color": "RED",
                             "description": failText
                         }
-                    })
+                    });
                 }
                 const roles: Role[] = [];
 
@@ -192,7 +192,7 @@ export const command: Command = {
 
                         if (index === arr.length - 1) resolve();
                     });
-                })
+                });
 
                 try {
                     await promise;
@@ -203,7 +203,7 @@ export const command: Command = {
                             "color": "RED",
                             "description": failText
                         }
-                    })
+                    });
                 }
 
                 const alreadyOnList: string[] = [];
@@ -211,8 +211,8 @@ export const command: Command = {
 
                     roles.forEach(async (r, index, arr) => {
 
-                        let dbRole = await rolesRepo.findOne({ where: { "serverID": msg.guild?.id ?? "1", "roleID": r.id } })
-                        if (client.whitelist.some((role) => role.whitelistedRole === r.id)) return reject(r);
+                        let dbRole = await rolesRepo.findOne({ where: { "serverID": msg.guild?.id ?? "1", "roleID": r.id } });
+                        if (client.whitelist.some((role) => role.whitelistedRole === r.id)) return void reject(r);
 
                         if (dbRole === undefined) {
                             const newRole = new Roles();
@@ -220,7 +220,7 @@ export const command: Command = {
                             newRole.roleID = r.id;
                             newRole.serverID = msg.guild?.id ?? "1";
                             await rolesRepo.save(newRole);
-                            dbRole = newRole
+                            dbRole = newRole;
                         } else {
                             dbRole.roleGroup = "Default";
                             await rolesRepo.save(dbRole);
@@ -228,8 +228,8 @@ export const command: Command = {
                         }
                         if (index === arr.length - 1) resolve();
 
-                    })
-                })
+                    });
+                });
                 try {
                     await waitForroles;
 
@@ -239,14 +239,15 @@ export const command: Command = {
                             "color": "RED",
                             "description": `${err} is already on the list for the whitelisted roles,\n> use \`whitelist list\` to view them!`
                         }
-                    })                }
+                    });
+                }
 
                 const listORoles = await client.embedReply(msg, {
                     embed: {
                         "title": "Adding Roles",
                         "description": roles.map((r) => {
-                            if (alreadyOnList.includes(r.id)) return `⦾ ${r} (Already on list)`
-                            return `⦾ ${r}`
+                            if (alreadyOnList.includes(r.id)) return `⦾ ${r} (Already on list)`;
+                            return `⦾ ${r}`;
                         }).join("\n"),
                         "fields": [{
                             "name": "We're not done yet!",
@@ -259,13 +260,13 @@ export const command: Command = {
                 try {
                     const message = await msg.channel.awaitMessages({ filter, time: 30000, "dispose": true, errors: ["time"], max: 1 });
                     const msgComp = message.first();
-                    if (msgComp === undefined) return client.commandFailed(msg);
+                    if (msgComp === undefined) return await client.commandFailed(msg);
 
-                    const waitForroles = new Promise<void>((resolve, reject) => {
+                    const waitForDB = new Promise<void>((resolve) => {
 
                         roles.forEach(async (r, index, arr) => {
 
-                            let dbRole = await rolesRepo.findOne({ where: { "serverID": msg.guild?.id ?? "1", "roleID": r.id } })
+                            let dbRole = await rolesRepo.findOne({ where: { "serverID": msg.guild?.id ?? "1", "roleID": r.id } });
 
                             if (dbRole === undefined) {
                                 const newRole = new Roles();
@@ -273,34 +274,34 @@ export const command: Command = {
                                 newRole.roleID = r.id;
                                 newRole.serverID = msg.guild?.id ?? "1";
                                 await rolesRepo.save(newRole);
-                                dbRole = newRole
+                                dbRole = newRole;
                             } else {
                                 dbRole.roleGroup = msgComp.content;
                                 await rolesRepo.save(dbRole);
                             }
 
                             if (listORoles instanceof Message) {
-                                const newList = listORoles.embeds[0].setDescription(roles.map((r) => {
-                                    if (alreadyOnList.includes(r.id)) return `⦾ **${dbRole?.roleGroup}** ${r} (Already on list)`
-                                    return `⦾ **${dbRole?.roleGroup}** ${r}`
-                                }).join("\n"))
-                                await listORoles.edit({ embeds: [newList] }).catch((err) => client.commandFailed(msg))
+                                const newList = listORoles.embeds[0].setDescription(roles.map((role) => {
+                                    if (alreadyOnList.includes(role.id)) return `⦾ **${dbRole?.roleGroup}** ${role} (Already on list)`;
+                                    return `⦾ **${dbRole?.roleGroup}** ${role}`;
+                                }).join("\n"));
+                                await listORoles.edit({ embeds: [newList] }).catch(async () => client.commandFailed(msg));
 
                             }
 
                             if (index === arr.length - 1) resolve();
 
-                        })
-                    })
+                        });
+                    });
                     try {
-                        await waitForroles;
+                        await waitForDB;
 
                     } catch (err) {
                         return client.commandFailed(msg);
                     }
 
 
-                    return client.embedReply(msg, {
+                    return await client.embedReply(msg, {
                         embed: {
                             "description": `I set the group for the roles to **${msgComp.content}**`
                         }
@@ -320,14 +321,14 @@ export const command: Command = {
 
             case "remove": {
                 args.shift();
-                const failText = "**Please mention a role(s) to remove**,\n> If you'd like to remove multiple roles you may use the command like this:\n> `roles remove @role1 @role2 @role3`"
+                const failText = "**Please mention a role(s) to remove**,\n> If you'd like to remove multiple roles you may use the command like this:\n> `roles remove @role1 @role2 @role3`";
                 if (args.length === 0) {
                     return client.embedReply(msg, {
                         embed: {
                             "color": "RED",
                             "description": failText
                         }
-                    })
+                    });
                 }
                 const roles: Role[] = [];
 
@@ -341,7 +342,7 @@ export const command: Command = {
 
                         if (index === arr.length - 1) resolve();
                     });
-                })
+                });
 
                 try {
                     await promise;
@@ -352,17 +353,17 @@ export const command: Command = {
                             "color": "RED",
                             "description": failText
                         }
-                    })
+                    });
                 }
 
 
                 const notOnList: string[] = [];
                 const removedroles: string[] = [];
-                const waitForroles = new Promise<void>((resolve, reject) => {
+                const waitForroles = new Promise<void>((resolve) => {
 
                     roles.forEach(async (r, index, arr) => {
 
-                        let dbRole = await rolesRepo.findOne({ where: { "serverID": msg.guild?.id ?? "1", "roleID": r.id } })
+                        const dbRole = await rolesRepo.findOne({ where: { "serverID": msg.guild?.id ?? "1", "roleID": r.id } });
 
                         if (dbRole === undefined) {
                             notOnList.push(r.id);
@@ -374,8 +375,8 @@ export const command: Command = {
 
                         if (index === arr.length - 1) resolve();
 
-                    })
-                })
+                    });
+                });
                 try {
                     await waitForroles;
 
@@ -389,7 +390,7 @@ export const command: Command = {
                         "description": `Removed Roles:\n ${removedroles.map((r) => `⦾ <@&${r}>`).join("\n")}`
                         + `${notOnList.length !== 0 ? `\nWas not Found:\n${notOnList.map((r) => `⦾ <@&${r}>`).join("\n")}` : ""}`
                     }
-                });            }
+                }); }
 
             default: {
                 return client.embedReply(msg, {
