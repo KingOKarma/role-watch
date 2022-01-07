@@ -9,7 +9,7 @@ export class Whitelist {
     public id!: number;
 
     @Column("text")
-    public serverID!: number;
+    public serverID!: string;
 
     @Column("text")
     public whitelistedRole!: string;

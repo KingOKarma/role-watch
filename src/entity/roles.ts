@@ -9,7 +9,7 @@ export class Roles {
     public id!: number;
 
     @Column("text")
-    public serverID!: number;
+    public serverID!: string;
 
     @Column("text")
     public roleID!: string;

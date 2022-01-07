@@ -1,8 +1,8 @@
-import { Collection, Interaction, Message, MessageActionRow, MessageButton } from "discord.js";
+import { Collection, Interaction, Message, MessageActionRow, MessageButton, Role } from "discord.js";
 import { Command } from "../../interfaces";
 import { getRole } from "../../utils/getRole";
-// import { Roles } from "../../entity/roles";
-// import { getRepository } from "typeorm";
+import { Roles } from "../../entity/roles";
+import { getRepository } from "typeorm";
 
 const pageTracker: Collection<string, number> = new Collection();
 export const command: Command = {
@@ -18,7 +18,7 @@ export const command: Command = {
 
         const [selection] = args;
 
-        // const rolesRepo = getRepository(Roles);
+        const rolesRepo = getRepository(Roles);
 
         switch (selection ? selection.toLowerCase() : "none") {
 
@@ -170,7 +170,6 @@ export const command: Command = {
             case "add": {
                 args.shift();
                 const failText = "**Please mention a role(s) to add**,\n> If you want to add multiple roles you may use the command like this:\n`> roles add @role1 @role2 @role3\`"
-                console.log(args);
                 if (args.length === 0) {
                     return client.embedReply(msg, {
                         embed: {
@@ -179,16 +178,16 @@ export const command: Command = {
                         }
                     })
                 }
-                // if (args.length === 0) break;
+                const roles: Role[] = [];
 
-                var promise = new Promise<void>((resolve, reject) => {
-
+                const promise = new Promise<void>((resolve, reject) => {
                     args.forEach(async (r, index, arr) => {
                         const role = await getRole(r, msg.guild);
-
                         if (role === null) {
                             reject();
                         }
+                        roles.push(role as Role);
+
                         if (index === arr.length - 1) resolve();
                     });
                 })
@@ -205,13 +204,111 @@ export const command: Command = {
                     })
                 }
 
-                return client.embedReply(msg, {
-                    embed: {
-                        "description": args.join(", ")
-                    }
+                const alreadyOnList: string[] = [];
+                const waitForroles = new Promise<void>((resolve, reject) => {
+
+                    roles.forEach(async (r, index, arr) => {
+
+                        let dbRole = await rolesRepo.findOne({ where: { "serverID": msg.guild?.id ?? "1", "roleID": r.id } })
+
+                        if (dbRole === undefined) {
+                            const newRole = new Roles();
+                            newRole.roleGroup = "Default";
+                            newRole.roleID = r.id;
+                            newRole.serverID = msg.guild?.id ?? "1";
+                            await rolesRepo.save(newRole);
+                            dbRole = newRole
+                        } else {
+                            dbRole.roleGroup = "Default";
+                            await rolesRepo.save(dbRole);
+                            alreadyOnList.push(r.id);
+                        }
+                        if (index === arr.length - 1) resolve();
+
+                    })
                 })
+                try {
+                    await waitForroles;
+
+                } catch (err) {
+                    return client.commandFailed(msg);
+                }
+
+                const listORoles = await client.embedReply(msg, {
+                    embed: {
+                        "title": "Adding Roles",
+                        "description": roles.map((r) => {
+                            if (alreadyOnList.includes(r.id)) return `⦾ ${r} (Already on list)`
+                            return `⦾ ${r}`
+                        }).join("\n"),
+                        "fields": [{
+                            "name": "We're not done yet!",
+                            "value": "> What is the name of the group you are assigning these roles to? Please type below\n"
+                        }]
+                    }
+                });
+
+                const filter = (m: Message): boolean => m.author.id === msg.author.id;
+                try {
+                    const message = await msg.channel.awaitMessages({ filter, time: 30000, "dispose": true, errors: ["time"], max: 1 });
+                    const msgComp = message.first();
+                    if (msgComp === undefined) return client.commandFailed(msg);
+
+                    const waitForroles = new Promise<void>((resolve, reject) => {
+
+                        roles.forEach(async (r, index, arr) => {
+
+                            let dbRole = await rolesRepo.findOne({ where: { "serverID": msg.guild?.id ?? "1", "roleID": r.id } })
+
+                            if (dbRole === undefined) {
+                                const newRole = new Roles();
+                                newRole.roleGroup = msgComp.content;
+                                newRole.roleID = r.id;
+                                newRole.serverID = msg.guild?.id ?? "1";
+                                await rolesRepo.save(newRole);
+                                dbRole = newRole
+                            } else {
+                                dbRole.roleGroup = msgComp.content;
+                                await rolesRepo.save(dbRole);
+                            }
+
+                            if (listORoles instanceof Message) {
+                                const newList = listORoles.embeds[0].setDescription(roles.map((r) => {
+                                    if (alreadyOnList.includes(r.id)) return `⦾ **${dbRole?.roleGroup}** ${r} (Already on list)`
+                                    return `⦾ **${dbRole?.roleGroup}** ${r}`
+                                }).join("\n"))
+                                await listORoles.edit({ embeds: [newList] }).catch((err) => client.commandFailed(msg))
+
+                            }
+
+                            if (index === arr.length - 1) resolve();
+
+                        })
+                    })
+                    try {
+                        await waitForroles;
+
+                    } catch (err) {
+                        return client.commandFailed(msg);
+                    }
 
 
+                    return client.embedReply(msg, {
+                        embed: {
+                            "description": `I set the group for the roles to **${msgComp.content}**`
+                        }
+                    });
+
+
+                } catch (err) {
+
+                    return client.embedReply(msg, {
+                        embed: {
+                            "description": "You didn't send any message so I set the group to \"Default\", you can change this by running the same command and setting the new group.",
+                            color: "RED"
+                        }
+                    });
+                }
             }
 
             case "remove": {
