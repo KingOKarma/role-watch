@@ -1,5 +1,6 @@
 import { Collection, Interaction, Message, MessageActionRow, MessageButton } from "discord.js";
 import { Command } from "../../interfaces";
+import { getRole } from "../../utils/getRole";
 // import { Roles } from "../../entity/roles";
 // import { getRepository } from "typeorm";
 
@@ -27,7 +28,7 @@ export const command: Command = {
                 let finalPage = 1;
                 let notMax = false;
                 while (!notMax) {
-                    const cmds = client.arrayPage(client.roles, 5, finalPage);
+                    const cmds = client.arrayPage(client.roles, 10, finalPage);
                     if (cmds.length !== 0) {
                         finalPage++;
                     } else {
@@ -54,6 +55,8 @@ export const command: Command = {
                     .setEmoji("▶️")
                     .setLabel((page + 1).toString())
                     .setStyle("PRIMARY");
+
+                if (finalPage < 2) right.setDisabled(true);
 
                 if (finalPage !== 0) {
 
@@ -165,11 +168,54 @@ export const command: Command = {
 
 
             case "add": {
+                args.shift();
+                const failText = "**Please mention a role(s) to add**,\n> If you want to add multiple roles you may use the command like this:\n`> roles add @role1 @role2 @role3\`"
+                console.log(args);
+                if (args.length === 0) {
+                    return client.embedReply(msg, {
+                        embed: {
+                            "color": "RED",
+                            "description": failText
+                        }
+                    })
+                }
+                // if (args.length === 0) break;
+
+                var promise = new Promise<void>((resolve, reject) => {
+
+                    args.forEach(async (r, index, arr) => {
+                        const role = await getRole(r, msg.guild);
+
+                        if (role === null) {
+                            reject();
+                        }
+                        if (index === arr.length - 1) resolve();
+                    });
+                })
+
+                try {
+                    await promise;
+
+                } catch (err) {
+                    return client.embedReply(msg, {
+                        embed: {
+                            "color": "RED",
+                            "description": failText
+                        }
+                    })
+                }
+
+                return client.embedReply(msg, {
+                    embed: {
+                        "description": args.join(", ")
+                    }
+                })
+
 
             }
 
             case "remove": {
-
+                break;
             }
 
             default: {

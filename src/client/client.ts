@@ -36,8 +36,8 @@ class ExtendedClient extends Client {
         const whitelistRepo = getRepository(Whitelist);
 
         let [bot] = await botRepo.find();
-        const roles = await rolesRepo.find();
-        const whitelist = await whitelistRepo.find();
+        let roles = await rolesRepo.find();
+        let whitelist = await whitelistRepo.find();
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (bot === undefined) {
             const newBot = new Bot();
@@ -47,7 +47,8 @@ class ExtendedClient extends Client {
 
         setInterval(async () => {
             [bot] = await botRepo.find();
-
+            roles = await rolesRepo.find();
+            whitelist = await whitelistRepo.find();
             this.roles = roles;
             this.whitelist = whitelist;
             this.primaryColour = bot.primaryColour as ColorResolvable;
@@ -233,6 +234,12 @@ class ExtendedClient extends Client {
  */
     public arrayPage<T>(array: T[], pageSize: number, pageNumber: number): T[] {
         return array.slice((pageNumber - 1) * pageSize, pageNumber * pageSize);
+    }
+
+    public async wait(ms: number): Promise<void> {
+        return new Promise<void>((resolve) => {
+            setTimeout(resolve, ms);
+        });
     }
 }
 
