@@ -171,7 +171,7 @@ export const command: Command = {
 
             case "add": {
                 args.shift();
-                const failText = "**Please mention a role(s) to add**,\n> If you want to add multiple roles you may use the command like this:\n`> roles add @role1 @role2 @role3\`"
+                const failText = "**Please mention a role(s) to add**,\n> If you want to add multiple roles you may use the command like this:\n> `roles add @role1 @role2 @role3`"
                 if (args.length === 0) {
                     return client.embedReply(msg, {
                         embed: {
@@ -319,8 +319,77 @@ export const command: Command = {
             }
 
             case "remove": {
-                break;
-            }
+                args.shift();
+                const failText = "**Please mention a role(s) to remove**,\n> If you'd like to remove multiple roles you may use the command like this:\n> `roles remove @role1 @role2 @role3`"
+                if (args.length === 0) {
+                    return client.embedReply(msg, {
+                        embed: {
+                            "color": "RED",
+                            "description": failText
+                        }
+                    })
+                }
+                const roles: Role[] = [];
+
+                const promise = new Promise<void>((resolve, reject) => {
+                    args.forEach(async (r, index, arr) => {
+                        const role = await getRole(r, msg.guild);
+                        if (role === null) {
+                            reject();
+                        }
+                        roles.push(role as Role);
+
+                        if (index === arr.length - 1) resolve();
+                    });
+                })
+
+                try {
+                    await promise;
+
+                } catch (err) {
+                    return client.embedReply(msg, {
+                        embed: {
+                            "color": "RED",
+                            "description": failText
+                        }
+                    })
+                }
+
+
+                const notOnList: string[] = [];
+                const removedroles: string[] = [];
+                const waitForroles = new Promise<void>((resolve, reject) => {
+
+                    roles.forEach(async (r, index, arr) => {
+
+                        let dbRole = await rolesRepo.findOne({ where: { "serverID": msg.guild?.id ?? "1", "roleID": r.id } })
+
+                        if (dbRole === undefined) {
+                            notOnList.push(r.id);
+
+                        } else {
+                            removedroles.push(dbRole.roleID);
+                            await rolesRepo.delete(dbRole);
+                        }
+
+                        if (index === arr.length - 1) resolve();
+
+                    })
+                })
+                try {
+                    await waitForroles;
+
+                } catch (err) {
+                    return client.commandFailed(msg);
+                }
+
+                return client.embedReply(msg, {
+                    embed: {
+                        "title": "Removing Roles",
+                        "description": `Removed Roles:\n ${removedroles.map((r) => `⦾ <@&${r}>`).join("\n")}`
+                        + `${notOnList.length !== 0 ? `\nWas not Found:\n${notOnList.map((r) => `⦾ <@&${r}>`).join("\n")}` : ""}`
+                    }
+                });            }
 
             default: {
                 return client.embedReply(msg, {
