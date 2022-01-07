@@ -65,7 +65,6 @@ class ExtendedClient extends Client {
             const cmds = readdirSync(`${commandPath}/${dir}`).filter((file) => file.endsWith(".js"));
 
             for (const file of cmds) {
-                // eslint-disable-next-line @typescript-eslint/no-var-requires
                 const { command } = await import(`${commandPath}/${dir}/${file}`);
                 this.commands.set(command.name, command);
 
@@ -91,12 +90,11 @@ class ExtendedClient extends Client {
 
         /* Buttons */
         const buttonsPath = path.join(__dirname, "..", "interactions", "buttons");
-        fs.readdirSync(buttonsPath).forEach((dir) => {
+        fs.readdirSync(buttonsPath).forEach(async (dir) => {
             const buttonFiles = readdirSync(`${buttonsPath}/${dir}`).filter((file) => file.endsWith(".js"));
 
             for (const file of buttonFiles) {
-                // eslint-disable-next-line @typescript-eslint/no-var-requires
-                const { buttons } = require(`${buttonsPath}/${dir}/${file}`);
+                const { buttons } = await import(`${buttonsPath}/${dir}/${file}`);
                 this.buttons.set(buttons.name, buttons);
 
             }
@@ -104,12 +102,11 @@ class ExtendedClient extends Client {
 
         /* Select Menus */
         const menuPath = path.join(__dirname, "..", "interactions", "selectMenus");
-        fs.readdirSync(menuPath).forEach((dir) => {
+        fs.readdirSync(menuPath).forEach(async (dir) => {
             const menuFiles = readdirSync(`${menuPath}/${dir}`).filter((file) => file.endsWith(".js"));
 
             for (const file of menuFiles) {
-                // eslint-disable-next-line @typescript-eslint/no-var-requires
-                const { menu } = require(`${menuPath}/${dir}/${file}`);
+                const { menu } = await import(`${menuPath}/${dir}/${file}`);
                 this.selectMenus.set(menu.name, menu);
 
             }
@@ -121,8 +118,7 @@ class ExtendedClient extends Client {
             const slashCommmands = readdirSync(`${slashPath}/${dir}`).filter((file) => file.endsWith(".js"));
 
             for (const file of slashCommmands) {
-                // eslint-disable-next-line @typescript-eslint/no-var-requires
-                const { slashCommand } = require(`${slashPath}/${dir}/${file}`);
+                const { slashCommand } = await import(`${slashPath}/${dir}/${file}`);
                 this.slashCommands.set(slashCommand.name, slashCommand);
 
             }
