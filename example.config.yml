@@ -1,5 +1,14 @@
-token: 'TOKEN_HERE_NOW'
-prefix: 'PREFIX'
-t3roleID: []
-roles: []
-guildID: ''
+devEnv:
+  devServer: "SERVERID"
+  isDev: false
+# Is this the dev testing bot or production?
+
+# List of the bot dev's IDs 
+owners: 
+-  "ListOfBotDevsIDs"
+
+# Prefix used for the bot
+prefix: "!"
+
+# The bot's token
+token: "BOTTOKEN"

@@ -1,59 +1,38 @@
-import * as commando from 'discord.js-commando';
-import {
-  addRole,
-  listRoles,
-  removeRole,
-} from '../../utils';
-import { CONFIG, rolePerms } from '../../globals';
+import { Command } from "../../interfaces";
 
-export default class whitelistCommand extends commando.Command {
-  constructor(client: commando.CommandoClient) {
-    super(client, {
-      name: 'whitelist',
-      group: 'manager',
-      memberName: 'whitelist',
-      description: 'Lets you decide to add, remove, or list the whitelist roles',
-      clientPermissions: rolePerms,
-      userPermissions: rolePerms,
-      throttling: {
-        usages: 3,
-        duration: 5,
-      },
-      guildOnly: true,
-      args: [
-        {
-          key: 'choice',
-          prompt: 'Add, Remove or List',
-          type: 'string',
-          oneOf: ['add', 'remove', 'list'],
-          default: '',
-        },
-        {
-          key: 'roleID',
-          prompt: 'I need a role to add/remove to/from',
-          type: 'string',
-          default: '',
-        },
-      ],
-    });
-  }
+export const command: Command = {
+    description: "Manage the whitelist !",
+    example: ["!whitelist list", "!whitelist add @role", "!whitelist remove @role"],
+    group: "manager",
+    name: "whitelist",
+    permissionsBot: ["MANAGE_ROLES"],
+    permissionsUser: ["MANAGE_ROLES"],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    run: async (client, msg, args) => {
+        const [selection] = args;
 
-  public async run(
-    msg: commando.CommandoMessage,
-    { choice, roleID }: { choice: string, roleID: string },
-  ): Promise<any> {
-    switch (choice.toLowerCase()) {
-      case 'add':
-        return addRole(msg, roleID, CONFIG.t3roleID, CONFIG.roles);
+        switch (selection ? selection.toLowerCase() : "none") {
 
-      case 'remove':
-        return removeRole(msg, roleID, CONFIG.t3roleID, CONFIG.roles);
+            case "list": {
 
-      case 'list':
-        return listRoles(msg, CONFIG.t3roleID, 'Colour roles');
+            }
 
-      default:
-        return msg.reply('Please give a choice\n`add <role>`, `remove <role>`, `list`');
+            case "add": {
+
+            }
+
+            case "remove": {
+
+            }
+
+            default: {
+                return client.embedReply(msg, { embed: {
+                    "color": "RED",
+                    "description": "Please specify either \"list\", \"add\" or \"remove\" eg: `whitelist list`"
+                } });
+            }
+
+
+        }
     }
-  }
-}
+};

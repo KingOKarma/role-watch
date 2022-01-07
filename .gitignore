@@ -1,4 +1,8 @@
+node_modules
+ormconfig.yml
+settingProvider.ts
 config.yml
 build
-node_modules
-package-lock.json
+.env
+storage.yml
+settings.sqlite3

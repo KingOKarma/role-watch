@@ -1,28 +1,5 @@
-import path from 'path';
-import { Client } from 'discord.js-commando';
-import { CONFIG } from './globals';
-import {
-  onMemberUpdate,
-  onReady,
-} from './events';
+import Client from "./client/client";
 
-async function main() {
-  const bot = new Client({
-    commandPrefix: CONFIG.prefix,
-  });
-
-  bot.on('ready', () => onReady(bot));
-
-  bot.on('guildMemberUpdate', onMemberUpdate);
-
-  bot.registry.registerGroups([
-    ['manager'],
-  ]).registerDefaults()
-    .registerCommandsIn(
-      path.join(__dirname, 'commands'),
-    );
-
-  await bot.login(CONFIG.token);
-}
-
-main().catch(console.error);
+void new Client({
+    intents: ["GUILD_MESSAGES", "GUILDS", "GUILD_BANS", "GUILD_MEMBERS", "DIRECT_MESSAGES"]
+}).init().catch(console.error);
