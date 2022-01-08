@@ -6,9 +6,9 @@ import { Guild, Role } from "discord.js";
  * @param {Guild} guild the Guild Instance
 *  @returns Role
  */
-export async function getRole(rid: string | null, guild: Guild | null): Promise<Role | null> {
-    if (rid === null) return null;
-    if (guild === null) return null;
+export async function getRole(rid?: string | null, guild?: Guild | null): Promise<Role | null> {
+    if (typeof rid !== "string") return null;
+    if (!(guild instanceof Guild)) return null;
 
     let ridParsed = rid;
     // Check if a role was tagged or not. If the role was tagged remove the

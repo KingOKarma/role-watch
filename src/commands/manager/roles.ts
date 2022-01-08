@@ -71,7 +71,7 @@ export const command: Command = {
                 const msgEmbed = await client.embedReply(msg, {
                     embed: {
                         "title": "List of Roles",
-                        "description": rolesList.map((c) => `⦾ **${c.roleGroup}** <@&${c.roleID}>`).join("\n")
+                        "description": rolesList.map((c) => `⦾ **${c.roleGroup}** <@&${c.roleID}>${c.description !== null ? `\n> ${c.description}` : ""}`).join("\n")
                     }, "components": buttons
                 });
 
@@ -106,7 +106,7 @@ export const command: Command = {
                                 "components": buttons, embeds: [{
                                     color: client.primaryColour,
                                     "title": "List of Roles",
-                                    "description": pagedRolesList.map((c) => `⦾ **${c.roleGroup}** <@&${c.roleID}>`).join("\n")
+                                    "description": pagedRolesList.map((c) => `⦾ **${c.roleGroup}** <@&${c.roleID}>${c.description !== null ? `\n> ${c.description}` : ""}`).join("\n")
                                 }]
                             });
                             pageTracker.set(msg.author.id, page);
@@ -132,7 +132,7 @@ export const command: Command = {
                                 "components": buttons, embeds: [{
                                     color: client.primaryColour,
                                     "title": "List of Roles",
-                                    "description": pagedRolesList.map((c) => `⦾ **${c.roleGroup}** <@&${c.roleID}>`).join("\n")
+                                    "description": pagedRolesList.map((c) => `⦾ **${c.roleGroup}** <@&${c.roleID}>${c.description !== null ? `\n> ${c.description}` : ""}`).join("\n")
                                 }]
                             });
                             pageTracker.set(msg.author.id, page);
@@ -157,7 +157,7 @@ export const command: Command = {
                         embeds: [{
                             color: client.primaryColour,
                             "title": "List of Roles",
-                            "description": pagedRolesList.map((c) => `⦾ **${c.roleGroup}** <@&${c.roleID}>`).join("\n"),
+                            "description": pagedRolesList.map((c) => `⦾ **${c.roleGroup}** <@&${c.roleID}>${c.description !== null ? `\n> ${c.description}` : ""}`).join("\n"),
                             "footer": { "text": "Page buttons have timed out" }
                         }]
                     });

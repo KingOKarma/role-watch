@@ -17,4 +17,8 @@ export class Roles {
     @Column("text")
     public roleGroup!: string;
 
+
+    @Column("text", { "nullable": true })
+    public description!: string | null;
+
 }

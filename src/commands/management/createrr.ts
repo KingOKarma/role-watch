@@ -18,7 +18,7 @@ export const command: Command = {
         if (!group) {
             return client.embedReply(msg, {
                 embed: {
-                    "description": "Please name a group from one of your role's lists, \n> You can view all of your role groups via `colour list`",
+                    "description": "Please name a group from one of your role's lists, \n> You can view all of your role groups via `role list`",
                     "color": "RED"
                 }
             });
@@ -28,7 +28,7 @@ export const command: Command = {
 
         if (roles.length === 0) return client.embedReply(msg, {
             embed: {
-                "description": "Could not find that group, \n> You can view all of your role groups via `colour list`",
+                "description": "Could not find that group, \n> You can view all of your role groups via `role list`",
                 "color": "RED"
             }
         });
@@ -42,10 +42,14 @@ export const command: Command = {
                 const role = await getRole(r.roleID, msg.guild);
                 if (role === null) return void reject(r.roleID);
 
+                let { description } = r;
+
+                if (description === "color" || description === "colour") description = role.hexColor;
+
                 const option: MessageSelectOptionData = {
                     "label": role.name,
                     "value": r.roleID,
-                    "description": role.hexColor
+                    "description": description ?? undefined
                 };
 
                 selectionRoles.push(option);
