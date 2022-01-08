@@ -2,7 +2,7 @@ import { GuildMember } from "discord.js";
 import SelectMenus from "../../../interfaces/selectMenus";
 
 export const menu: SelectMenus = {
-    name: "rr-selection",
+    name: "rr-multi",
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     run: async (client, int) => {
         const [role] = int.values;
@@ -53,7 +53,7 @@ export const menu: SelectMenus = {
                 return void await int.reply({
                     ephemeral: true, "embeds": [{
                         "color": client.primaryColour,
-                        "description": `${int.member} Your role have been removed. \nRemoved role: \n${assinedRoles.map((r) => `<@&${r.roleID}>`).join(", ")}`
+                        "description": `${int.member} Your roles have been removed. \nRemoved roles: \n${assinedRoles.map((r) => `<@&${r.roleID}>`).join(", ")}`
                     }]
                 });
             }
@@ -71,18 +71,12 @@ export const menu: SelectMenus = {
 
             } else {
 
-                const extraRoles = client.roles.filter((r) => member.roles.cache.has(r.roleID));
-                if (extraRoles.length !== 0) {
-                    extraRoles.forEach(async (r) => member.roles.remove(r.roleID));
-
-                }
-
 
                 await member.roles.add(role);
                 await int.reply({
                     ephemeral: true, "embeds": [{
                         "color": client.primaryColour,
-                        "description": `${int.member} You have switched to the <@&${role}> Role`
+                        "description": `${int.member} You have been given the <@&${role}> Role`
                     }]
                 });
             }

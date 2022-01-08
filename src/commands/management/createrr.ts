@@ -1,4 +1,4 @@
-import { MessageActionRow, MessageSelectMenu, MessageSelectOptionData } from "discord.js";
+import { Message, MessageActionRow, MessageSelectMenu, MessageSelectOptionData } from "discord.js";
 import { Command } from "../../interfaces";
 import { getRole } from "../../utils/getRole";
 
@@ -64,21 +64,49 @@ export const command: Command = {
                 }
             });
         }
+        let choice;
+        const relpy = await client.embedReply(msg, { embed: { "description": "Nearly done!, Now please specify either \"selection\" or \"multi\" to choose the type of role assign" } });
+        const filter = (m: Message): boolean => m.author.id === msg.author.id && m.content.toLowerCase() === "selection" || m.content.toLowerCase() === "multi";
+        try {
+            const message = await msg.channel.awaitMessages({ filter, time: 30000, "dispose": true, errors: ["time"], max: 1 });
+            choice = message.first()?.content;
+            await message.first()?.delete();
+            if (relpy instanceof Message) await relpy.delete();
 
-        const option: MessageSelectOptionData = {
-            "label": "Remove All Roles",
-            "value": "remove",
-            "description": "Use this to remove all of your roles from this list"
-        };
-
-        selectionRoles.push(option);
-
+        } catch (err) {
+            return client.embedReply(msg, { embed: { "description": "The command canceld as you failed to specify either \"selection\" or \"multi\"" } });
+        }
         const selection = new MessageSelectMenu();
-        selection.setCustomId("rr-selection");
-        selection.setPlaceholder("Select Your Roles");
-        selection.setOptions(selectionRoles);
-        selection.setMinValues(0);
-        selection.setMaxValues(1);
+
+        switch (choice) {
+            case "selection": {
+                selection.setCustomId("rr-selection");
+                selection.setPlaceholder("Select Your Roles");
+                selection.setOptions(selectionRoles);
+                selection.setMaxValues(1);
+                break;
+
+            }
+            case "multi": {
+                const option: MessageSelectOptionData = {
+                    "label": "Remove All Roles",
+                    "value": "remove",
+                    "description": "Use this to remove all of your roles from this list"
+                };
+
+                selectionRoles.push(option);
+
+                selection.setCustomId("rr-multi");
+                selection.setPlaceholder("Select Your Roles");
+                selection.setOptions(selectionRoles);
+                selection.setMaxValues(1);
+                break;
+            }
+            default: {
+                return client.commandFailed(msg);
+            }
+        }
+
 
         menu.setComponents(selection);
 
@@ -86,7 +114,8 @@ export const command: Command = {
             embeds: [{
                 "title": roles[0].roleGroup,
                 "description": "Select your role(s)",
-                "color": client.primaryColour
+                "color": client.primaryColour,
+                "footer": { "text": choice }
             }],
             components: [menu]
         });
