@@ -2,12 +2,17 @@ import { Message, PermissionString } from "discord.js";
 import { CONFIG } from "../globals";
 import { Event } from "../interfaces/event";
 import { formatPermsArray } from "../utils/formatPermsArray";
+import { messageRoleManager } from "../utils/messageHandler/roleManager";
 import ms from "ms";
 
 export const event: Event = {
     name: "messageCreate",
     run: (client, msg: Message) => {
-        if (msg.author.bot || !msg.guild || !msg.content.startsWith(CONFIG.prefix)) return;
+        if (msg.author.bot || !msg.guild) return;
+
+        messageRoleManager(msg, client);
+
+        if (!msg.content.startsWith(CONFIG.prefix)) return;
 
         const args = msg.content
             .slice(CONFIG.prefix.length)
@@ -84,5 +89,6 @@ export const event: Event = {
             command.run(client, msg, args);
 
         }
+
     }
 };
