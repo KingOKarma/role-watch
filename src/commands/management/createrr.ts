@@ -80,6 +80,15 @@ export const command: Command = {
 
         switch (choice) {
             case "selection": {
+
+                const option: MessageSelectOptionData = {
+                    "label": "Remove Current Role",
+                    "value": "remove",
+                    "description": "Use this to remove your current role"
+                };
+
+                selectionRoles.push(option);
+
                 selection.setCustomId("rr-selection");
                 selection.setPlaceholder("Select Your Roles");
                 selection.setOptions(selectionRoles);
