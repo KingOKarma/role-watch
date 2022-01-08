@@ -6,8 +6,8 @@ import { getRole } from "../../utils/getRole";
 
 const pageTracker: Collection<string, number> = new Collection();
 export const command: Command = {
-    aliases: ["roles"],
-    description: "Manage the assignable roles!",
+    aliases: ["role"],
+    description: "Manage the assignable roles and their groups",
     example: ["!roles list", "!roles add @role", "!roles remove @role"],
     group: "manager",
     name: "roles",

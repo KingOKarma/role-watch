@@ -7,7 +7,7 @@ import { getRole } from "../../utils/getRole";
 const pageTracker: Collection<string, number> = new Collection();
 
 export const command: Command = {
-    description: "Manage the whitelist !",
+    description: "Manage the whitelisted roles and their groups",
     example: ["!whitelist list", "!whitelist add @role", "!whitelist remove @role"],
     group: "manager",
     name: "whitelist",

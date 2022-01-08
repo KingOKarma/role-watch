@@ -59,6 +59,7 @@ class ExtendedClient extends Client {
         this.whitelist = whitelist;
         this.primaryColour = bot.primaryColour as ColorResolvable;
 
+
         /* Commands */
         const commandPath = path.join(__dirname, "..", "commands");
         fs.readdirSync(commandPath).forEach(async (dir) => {
