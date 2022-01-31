@@ -14,15 +14,19 @@ export const menu: SelectMenus = {
 
         const whitelist = client.whitelist.filter((wh) => wh.roleGroup === int.message.embeds[0].title && wh.serverID === int.guild?.id);
 
-        const hasWhitelistedRole = whitelist.some((wh) => member.roles.cache.has(wh.whitelistedRole));
+        if (whitelist.length > 0) {
+            const hasWhitelistedRole = whitelist.some((wh) => member.roles.cache.has(wh.whitelistedRole));
 
 
-        if (!hasWhitelistedRole) return void await int.reply({
-            ephemeral: true, "embeds": [{
-                "color": client.primaryColour,
-                "description": `${int.member} You do not have the required role to get <@&${role}>,\nyou need one of these:\n${whitelist.map((r) => `<@&${r.whitelistedRole}>`).join(", ")}`
-            }]
-        });
+            if (!hasWhitelistedRole) return void await int.reply({
+                ephemeral: true, "embeds": [{
+                    "color": client.primaryColour,
+                    "description": `${int.member} You do not have the required role to get <@&${role}>,\nyou need one of these:\n${whitelist.map((r) => `<@&${r.whitelistedRole}>`).join(", ")}`
+                }]
+            });
+
+        }
+
 
         try {
 
